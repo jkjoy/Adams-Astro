@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+// 生成所有文章的路由
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => {
+    return data.draft !== true;
+  });
+
+  // 按日期排序（最新的在前）
+  const sortedPosts = posts.sort((a, b) => {
+    return b.data.date.valueOf() - a.data.date.valueOf();
+  });
+
+  return sortedPosts.map((post, index) => {
+    // 上一篇：索引 - 1（更新的文章）
+    const prevPost = index > 0 ? sortedPosts[index - 1] : null;
+    // 下一篇：索引 + 1（更旧的文章）
+    const nextPost = index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
+
+    return {
+      params: { slug: post.slug },
+      props: {
+        post,
+        prevPost: prevPost ? { slug: prevPost.slug, title: prevPost.data.title } : null,
+        nextPost: nextPost ? { slug: nextPost.slug, title: nextPost.data.title } : null,
+      },
+    };
+  });
+}
+
+// 获取当前文章和相邻文章
+const { post, prevPost, nextPost } = Astro.props;
+const { Content } = await post.render();
+---
+
+<PostLayout
+  title={post.data.title}
+  description={post.data.description}
+  date={post.data.date}
+  author={post.data.author}
+  image={post.data.image}
+  tags={post.data.tags}
+  slug={post.slug}
+  prevPost={prevPost}
+  nextPost={nextPost}
+>
+  <Content />
+</PostLayout>

@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostList from '../components/PostList.astro';
+import Pagination from '../components/Pagination.astro';
+import type { Post } from '../components/PostList.astro';
+import { siteConfig } from '../site.config';
+import { getPostThumbnail } from '../utils/getPostThumbnail';
+
+// 获取所有文章
+const allPosts = await getCollection('posts', ({ data }) => {
+  // 过滤掉草稿
+  return data.draft !== true;
+});
+
+// 按日期排序（最新的在前面）
+const sortedPosts = allPosts.sort((a, b) => {
+  return b.data.date.valueOf() - a.data.date.valueOf();
+});
+
+// 分页设置
+const perPage = siteConfig.posts.perPage;
+const currentPage = 1;
+const totalPages = Math.ceil(sortedPosts.length / perPage);
+
+// 获取当前页的文章
+const startIndex = (currentPage - 1) * perPage;
+const endIndex = startIndex + perPage;
+const paginatedPosts = sortedPosts.slice(startIndex, endIndex);
+
+// 转换为 PostList 组件需要的格式
+const posts: Post[] = paginatedPosts.map((post) => ({
+  title: post.data.title,
+  url: `/posts/${post.slug}`,
+  date: post.data.date.toISOString(),
+  excerpt: post.data.description,
+  thumbnail: getPostThumbnail(post.data.image, post.body),
+  tags: post.data.tags,
+}));
+---
+
+<BaseLayout>
+  <PostList posts={posts} />
+  <Pagination currentPage={currentPage} totalPages={totalPages} />
+</BaseLayout>

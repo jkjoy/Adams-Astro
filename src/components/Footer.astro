@@ -1,0 +1,30 @@
+---
+import { siteConfig } from '../site.config';
+
+const { site, navigation } = siteConfig;
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <nav class="menu">
+      <ul>
+        {navigation.footer.map((item) => (
+          <li>
+            <a href={item.url}>{item.name}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div>
+      <span>© {currentYear} {site.name}</span>
+      <span class="right">
+        {site.description}
+      </span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* Footer 特定样式已在 global.css 中定义 */
+</style>

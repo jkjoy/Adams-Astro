@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import type { Post } from '../../components/PostList.astro';
+import { getPostThumbnail } from '../../utils/getPostThumbnail';
+
+// 生成所有标签的路由
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts', ({ data }) => {
+    return data.draft !== true;
+  });
+
+  // 获取所有唯一标签
+  const uniqueTags = new Set<string>();
+  allPosts.forEach((post) => {
+    if (post.data.tags) {
+      post.data.tags.forEach((tag) => uniqueTags.add(tag));
+    }
+  });
+
+  // 为每个标签生成路由
+  return Array.from(uniqueTags).map((tag) => {
+    const filteredPosts = allPosts.filter((post) => {
+      return post.data.tags?.includes(tag);
+    });
+
+    return {
+      params: { tag },
+      props: { posts: filteredPosts, tag },
+    };
+  });
+}
+
+// 获取当前标签和文章
+const { posts, tag } = Astro.props;
+
+// 按日期排序
+const sortedPosts = posts.sort((a, b) => {
+  return b.data.date.valueOf() - a.data.date.valueOf();
+});
+
+// 转换为 PostList 组件需要的格式
+const postList: Post[] = sortedPosts.map((post) => ({
+  title: post.data.title,
+  url: `/posts/${post.slug}`,
+  date: post.data.date.toISOString(),
+  excerpt: post.data.description,
+  thumbnail: getPostThumbnail(post.data.image, post.body),
+  tags: post.data.tags,
+}));
+---
+
+<BaseLayout title={`标签：${tag}`} description={`包含标签 "${tag}" 的所有文章`}>
+  <div class="tag-page">
+    <PostList posts={postList} />
+  </div>
+</BaseLayout>
+
+<style>
+  .tag-page {
+    max-width: 100%;
+  }
+ 
+</style>

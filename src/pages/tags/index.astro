@@ -1,0 +1,100 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// 获取所有已发布的文章
+const allPosts = await getCollection('posts', ({ data }) => {
+  return data.draft !== true;
+});
+
+// 统计标签及其文章数量
+interface TagCount {
+  name: string;
+  count: number;
+  posts: typeof allPosts;
+}
+
+const tagMap = new Map<string, typeof allPosts>();
+
+allPosts.forEach((post) => {
+  if (post.data.tags) {
+    post.data.tags.forEach((tag) => {
+      if (!tagMap.has(tag)) {
+        tagMap.set(tag, []);
+      }
+      tagMap.get(tag)!.push(post);
+    });
+  }
+});
+
+// 转换为数组并按文章数量排序
+const tags: TagCount[] = Array.from(tagMap.entries())
+  .map(([name, posts]) => ({
+    name,
+    count: posts.length,
+    posts,
+  }))
+  .sort((a, b) => b.count - a.count);
+
+const totalTags = tags.length;
+const totalPosts = allPosts.length;
+---
+
+<BaseLayout title="标签" description="所有文章标签">
+
+    <div class="tags-cloud">
+      {tags.map((tag) => {
+        // 根据文章数量计算标签大小
+        const minSize = 0.9;
+        const maxSize = 2;
+        const maxCount = Math.max(...tags.map(t => t.count));
+        const size = minSize + ((tag.count / maxCount) * (maxSize - minSize));
+
+        return (
+          <a
+            href={`/tags/${tag.name}`}
+            class="tag-item"
+            style={`font-size: ${size}rem;`}
+          >
+            {tag.name}
+            <span class="tag-count">{tag.count}</span>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tags-page {
+    max-width: 100%;
+  }
+ 
+
+  .tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-radius: 20px;
+  }
+
+  .tag-item:hover {
+    color: var(--color-primary);
+    background: rgba(50, 116, 255, 0.1);
+    transform: scale(1.1);
+  }
+
+  .tag-count {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: rgba(136, 136, 136, 0.15);
+    color: var(--color-text-tertiary);
+  }
+ 
+ 
+</style>

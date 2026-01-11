@@ -1,0 +1,25 @@
+---
+/**
+ * 异步加载非关键 CSS
+ * 使用此组件来延迟加载非首屏必需的样式
+ */
+---
+
+<script>
+  // 异步加载完整的全局样式
+  function loadDeferredStyles() {
+    // 动态创建 link 标签加载 global.css
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = new URL('../styles/global.css', import.meta.url).href;
+    document.head.appendChild(link);
+  }
+
+  // 页面加载完成后再加载非关键样式
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadDeferredStyles);
+  } else {
+    // 如果 DOM 已经准备好，立即加载
+    loadDeferredStyles();
+  }
+</script>

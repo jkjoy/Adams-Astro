@@ -1,0 +1,111 @@
+/**
+ * Critical CSS - 首屏渲染必需的最小样式
+ * 此文件会被内联到 <head> 中，应保持尽可能小
+ */
+
+/* CSS 变量定义 - 首屏必需 */
+:root {
+  --color-primary: #3274ff;
+  --color-primary-hover: #5c91ff;
+  --color-text-primary: #434a54;
+  --color-text-secondary: #656D78;
+  --color-text-tertiary: #AAB2BD;
+  --color-text-light: #CCD1D9;
+  --color-bg-primary: #FFF;
+  --color-bg-secondary: #F5F7FA;
+  --color-bg-tertiary: #fafafa;
+  --color-border-light: #E6E9ED;
+  --color-border-medium: rgba(189, 202, 219, 0.3);
+
+  --font-family-base: "lucida grande", "lucida sans unicode", lucida, helvetica, "PingFang SC", "Hiragino Sans GB", "STHeiti Light", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  --container-max-width: 780px;
+  --container-padding: 2%;
+  --border-radius-medium: 3px;
+  --transition-fast: 0.3s;
+}
+
+/* 护眼模式 */
+html.sepia, body.sepia {
+  --color-primary: #704214;
+  --color-text-primary: #704214;
+  --color-text-secondary: #b38a60;
+  --color-bg-primary: #f3eacb;
+  --color-bg-secondary: #eae0be;
+  --color-border-light: #eae0be;
+}
+
+/* 夜间模式 */
+html.night, body.night {
+  --color-primary: #bdcadb;
+  --color-text-primary: #bdcadb;
+  --color-text-secondary: #666e8e;
+  --color-bg-primary: #1c1f2b;
+  --color-bg-secondary: #393f56;
+  --color-border-light: #393f56;
+}
+
+/* Serif 字体 */
+html.serif body, body.serif {
+  font-family: serif;
+}
+
+/* 最小 Reset - 只包含关键的 */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 容器 - 首屏布局必需 */
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+/* Header 基本样式 - 首屏必需 */
+.header {
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* 防止布局偏移 */
+a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 字体加载优化 - 使用 font-display: swap */
+@font-face {
+  font-family: 'StrawberryIcon-pro';
+  src: url('/fonts/StrawberryIcon-pro.woff?cgglgw') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+[class^="czs-"], [class*=" czs-"] {
+  font-family: 'StrawberryIcon-pro' !important;
+  font-style: normal;
+  font-weight: normal;
+  display: inline-block;
+  line-height: 1;
+}

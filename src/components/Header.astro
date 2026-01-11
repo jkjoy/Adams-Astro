@@ -1,0 +1,299 @@
+---
+import { siteConfig } from '../site.config';
+import Social from './Social.astro';
+import Placard from './Placard.astro';
+
+export interface Props {
+  // Header h1 显示的标题
+  headerTitle?: string;
+  // 文章信息（仅文章页传入）
+  postTitle?: string;
+  postDate?: Date;
+  postSlug?: string;
+}
+
+const { headerTitle, postTitle, postDate, postSlug } = Astro.props;
+
+const { site, navigation, features, donate, comments } = siteConfig;
+const currentPath = Astro.url.pathname;
+
+// 判断是否为文章页
+const isPostPage = !!postTitle;
+
+// 格式化日期
+const formattedDate = postDate?.toISOString().split('T')[0];
+const dateTimeAttr = postDate?.toISOString();
+
+// 当前页面 URL（用于生成二维码）
+const currentUrl = postSlug ? `${site.url}/posts/${postSlug}` : site.url;
+const qrcodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=10&data=${encodeURIComponent(currentUrl)}`;
+---
+
+<header class="header">
+  <section class="container">
+    <hgroup itemscope itemtype="https://schema.org/WPHeader">
+      <!-- 显示 headerTitle（首页=网站名，其他页面=页面标题） -->
+      <h1 class="fullname">{headerTitle || site.name}</h1>
+    </hgroup>
+
+    <Social />
+
+    <nav class="header_nav">
+      <ul class="menu">
+        {navigation.header.map((item) => (
+          <li class={currentPath === item.url ? 'current-menu-item' : ''}>
+            <a href={item.url}>{item.name}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </section>
+
+  <section class="infos">
+    <div class="container">
+      {isPostPage ? (
+        <>
+          <!-- 文章页：显示文章信息 -->
+          <!-- fixed-title 用于滚动时固定显示 -->
+          <h2 class="fixed-title">{postTitle}</h2>
+          <div class="fixed-menus"></div>
+
+          <div class="fields">
+            <span>
+              <i class="czs-time-l"></i>
+              <time datetime={dateTimeAttr} title={dateTimeAttr} itemprop="datePublished" pubdate>
+                {formattedDate}
+              </time>
+            </span>
+            /
+            <span>
+              <i class="czs-talk-l"></i>
+              <span class="comment-count" data-slug={postSlug}>0</span>评
+            </span>
+          </div>
+
+          <div class="socials">
+            {features.donate && (donate.alipay || donate.wechat) && (
+              <div class="donate">
+                <a href="javascript:;">
+                  <i class="czs-coin-l s"></i>
+                  <i class="czs-coin h"></i> 赏
+                </a>
+                <div class="window">
+                  <ul>
+                    {donate.alipay && (
+                      <li class="alipay">
+                        <img src={donate.alipay} alt="支付宝" />
+                      </li>
+                    )}
+                    {donate.wechat && (
+                      <li>
+                        <img src={donate.wechat} alt="微信" />
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {features.share && (
+              <div class="share">
+                <a href="javascript:void(0);" data-qrcode={qrcodeUrl}>
+                  <i class="czs-scan-l s"></i>
+                  <i class="czs-qrcode-l h"></i> 码
+                </a>
+                <div class="qrcode">
+                  <div class="img-box"></div>
+                  <i>移动设备上继续阅读</i>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <!-- 非文章页：显示公告 -->
+          <h2 class="fixed-title"></h2>
+          <div class="fixed-menus"></div>
+          <Placard />
+        </>
+      )}
+    </div>
+  </section>
+</header>
+
+<script>
+  // 打赏按钮交互
+  document.addEventListener('DOMContentLoaded', () => {
+    const donateBtn = document.querySelector('.donate a');
+    const infos = document.querySelector('.infos');
+
+    if (donateBtn && infos) {
+      donateBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        infos.classList.toggle('donate-close');
+        // 关闭分享面板
+        infos.classList.remove('share-close');
+      });
+    }
+
+    // 分享按钮交互
+    const shareBtn = document.querySelector('.share a');
+    if (shareBtn && infos) {
+      shareBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const qrcodeUrl = shareBtn.getAttribute('data-qrcode');
+        const imgBox = document.querySelector('.share .qrcode .img-box');
+
+        // 加载二维码
+        if (imgBox && qrcodeUrl) {
+          if (!imgBox.querySelector('img')) {
+            const img = document.createElement('img');
+            img.src = qrcodeUrl;
+            img.alt = 'QR Code';
+            imgBox.appendChild(img);
+          }
+        }
+
+        infos.classList.toggle('share-close');
+        // 关闭打赏面板
+        infos.classList.remove('donate-close');
+      });
+    }
+
+    // 点击其他地方关闭面板
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.donate') && !target.closest('.share')) {
+        infos?.classList.remove('donate-close', 'share-close');
+      }
+    });
+
+    // 滚动时固定信息栏
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+      if (scrollTop > 200) {
+        infos?.classList.add('fixed');
+      } else {
+        infos?.classList.remove('fixed');
+      }
+    });
+  });
+</script>
+
+<!-- 评论数获取脚本 -->
+{isPostPage && features.comments && comments.type !== 'none' && (
+  <script is:inline define:vars={{
+    postSlug,
+    commentType: comments.type,
+    artalkConfig: comments.artalk,
+    twikooConfig: comments.twikoo
+  }}>
+    // 获取评论数
+    async function loadCommentCount() {
+      const countElement = document.querySelector('.comment-count');
+      if (!countElement || !postSlug) return;
+
+      try {
+        if (commentType === 'artalk') {
+          // Artalk 评论数
+          await loadArtalkCount(countElement);
+        } else if (commentType === 'twikoo') {
+          // Twikoo 评论数
+          await loadTwikooCount(countElement);
+        }
+      } catch (error) {
+        console.error('Failed to load comment count:', error);
+      }
+    }
+
+    // 加载 Artalk 评论数
+    async function loadArtalkCount(element) {
+      const { server, site } = artalkConfig;
+
+      try {
+        const response = await fetch(`${server}/api/v2/stats/page_pv`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            site_name: site,
+            page_keys: [postSlug],
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data && data.data[0]) {
+            const count = data.data[0].comments_count || 0;
+            element.textContent = count;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load Artalk comment count:', error);
+      }
+    }
+
+    // 加载 Twikoo 评论数
+    async function loadTwikooCount(element) {
+      // 先加载 Twikoo SDK
+      if (typeof twikoo === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.32/dist/twikoo.all.min.js';
+
+        await new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      // 等待 Twikoo 加载完成
+      await new Promise(resolve => {
+        const checkTwikoo = setInterval(() => {
+          if (typeof twikoo !== 'undefined') {
+            clearInterval(checkTwikoo);
+            resolve();
+          }
+        }, 100);
+
+        // 10秒超时
+        setTimeout(() => {
+          clearInterval(checkTwikoo);
+          resolve();
+        }, 10000);
+      });
+
+      try {
+        const { envId, region } = twikooConfig;
+
+        // 使用 Twikoo API 获取评论数
+        const counts = await twikoo.getCommentsCount({
+          envId: envId,
+          region: region,
+          urls: [postSlug],
+          includeReply: true,
+        });
+
+        if (counts && counts.length > 0) {
+          element.textContent = counts[0].count || 0;
+        }
+      } catch (error) {
+        console.error('Failed to load Twikoo comment count:', error);
+      }
+    }
+
+    // 页面加载完成后获取评论数
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadCommentCount);
+    } else {
+      loadCommentCount();
+    }
+  </script>
+)}
+
+<style>
+  /* Header 特定样式已在 global.css 中定义 */
+</style>

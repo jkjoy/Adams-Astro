@@ -1,0 +1,57 @@
+---
+export interface Post {
+  title: string;
+  url: string;
+  date: string;
+  excerpt?: string;
+  thumbnail?: string;
+  tags?: string[];
+}
+
+export interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+
+// 格式化日期
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+---
+
+<div class="post-list">
+  {posts.map((post) => (
+    <article class="meta">
+      <header>
+        <h2>
+          <a href={post.url}>{post.title}</a>
+        </h2>
+      </header>
+      <main>
+        {post.thumbnail && (
+          <div class="thumb" style={`background-image: url(${post.thumbnail})`}></div>
+        )}
+        {post.excerpt && <p>{post.excerpt}</p>}
+      </main>
+      <footer>
+        <span>{formatDate(post.date)}</span>
+        {post.tags && post.tags.length > 0 && (
+          <>
+            <span class="hr"></span>
+            <span>{post.tags.join(', ')}</span>
+          </>
+        )}
+      </footer>
+    </article>
+  ))}
+</div>
+
+<style>
+  /* Post List 样式已在 global.css 中定义 */
+</style>

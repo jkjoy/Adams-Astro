@@ -1,0 +1,237 @@
+---
+import BaseLayout from '../layouts/GoLayout.astro';
+---
+
+<BaseLayout title="页面跳转中..." description="即将离开本站">
+  <div class="container go-page">
+    <div class="go-card">
+      <div class="icon">
+        <i class="czs-link-l"></i>
+      </div>
+
+      <h1>页面跳转提示</h1>
+
+      <div class="message">
+        <p>您即将离开本站，访问外部链接：</p>
+        <div class="target-url" id="targetUrl">
+          <span class="url-text"></span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="javascript:void(0)" class="btn btn-primary" id="goNow">
+          立即跳转
+        </a>
+        <a href="javascript:window.close()" class="btn btn-secondary">
+          关闭窗口
+        </a>
+      </div>
+
+      <div class="tips">
+        <p>⚠️ 请注意：</p>
+        <ul>
+          <li>外部链接的内容与本站无关</li>
+          <li>请注意保护个人信息安全</li>
+          <li>如有疑问，请谨慎访问</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .go-page {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+
+  .go-card {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    border-radius: 10px;
+    padding: 3rem 2rem;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .icon {
+    font-size: 4rem;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .go-card h1 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .message {
+    margin: 2rem 0;
+  }
+
+  .message p {
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.8;
+  }
+
+  .target-url {
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+    word-break: break-all;
+  }
+
+  .url-text {
+    color: var(--color-primary);
+    font-family: var(--font-family-code);
+    font-size: 0.95rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+  }
+
+  .btn {
+    padding: 0.8rem 2rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(50, 116, 255, 0.3);
+  }
+
+  .btn-secondary {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border-light);
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-bg-tertiary);
+    transform: translateY(-2px);
+  }
+
+  .tips {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border-light);
+    text-align: left;
+  }
+
+  .tips p {
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .tips ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .tips li {
+    color: var(--color-text-tertiary);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    padding-left: 1.2rem;
+    position: relative;
+  }
+
+  .tips li:before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-text-tertiary);
+  }
+
+  /* 移动端适配 */
+  @media (max-width: 42rem) {
+    .go-card {
+      padding: 2rem 1.5rem;
+    }
+
+    .go-card h1 {
+      font-size: 1.5rem;
+    }
+
+    .actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  /* 夜间模式 */
+  body.night .go-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  body.night .btn-primary:hover {
+    box-shadow: 0 4px 8px rgba(189, 202, 219, 0.3);
+  }
+
+  /* 护眼模式 */
+  body.sepia .btn-primary {
+    background: #704214;
+    color: #f3eacb;
+  }
+
+  body.sepia .btn-primary:hover {
+    background: #8b5319;
+    box-shadow: 0 4px 8px rgba(112, 66, 20, 0.3);
+  }
+</style>
+
+<script>
+  // 获取 URL 参数
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetUrl = urlParams.get('url');
+
+  if (!targetUrl) {
+    // 如果没有 URL 参数，返回首页
+    window.location.href = '/';
+  } else {
+    // 显示目标 URL
+    const urlTextElement = document.querySelector('.url-text');
+    if (urlTextElement) {
+      urlTextElement.textContent = decodeURIComponent(targetUrl);
+    }
+
+    // 立即跳转按钮
+    const goNowButton = document.getElementById('goNow');
+    if (goNowButton) {
+      goNowButton.addEventListener('click', () => {
+        // 在当前窗口跳转到目标链接
+        window.location.href = targetUrl;
+      });
+    }
+  }
+</script>

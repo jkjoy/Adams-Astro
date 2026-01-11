@@ -1,0 +1,29 @@
+# 静态资源缓存配置（适用于 Netlify、Cloudflare Pages 等）
+
+# 字体文件 - 1 年缓存
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 构建生成的静态资源（带哈希的文件）- 1 年缓存
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 图片文件 - 1 年缓存
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML 文件 - 不缓存或短期缓存
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# RSS Feed - 1 小时缓存
+/rss.xml
+  Cache-Control: public, max-age=3600
+
+# Favicon - 1 周缓存
+/favicon.svg
+/favicon.ico
+  Cache-Control: public, max-age=604800

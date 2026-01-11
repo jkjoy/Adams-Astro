@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import Pagination from '../../components/Pagination.astro';
+import type { Post } from '../../components/PostList.astro';
+import { siteConfig } from '../../site.config';
+import { getPostThumbnail } from '../../utils/getPostThumbnail';
+
+// 生成所有分页路由
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts', ({ data }) => {
+    return data.draft !== true;
+  });
+
+  // 按日期排序
+  const sortedPosts = allPosts.sort((a, b) => {
+    return b.data.date.valueOf() - a.data.date.valueOf();
+  });
+
+  const perPage = siteConfig.posts.perPage;
+  const totalPages = Math.ceil(sortedPosts.length / perPage);
+
+  // 生成第 2 页到最后一页的路由（第 1 页是首页 /）
+  return Array.from({ length: totalPages - 1 }, (_, i) => {
+    const page = i + 2; // 从第 2 页开始
+    const startIndex = (page - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    const paginatedPosts = sortedPosts.slice(startIndex, endIndex);
+
+    return {
+      params: { page: page.toString() },
+      props: {
+        posts: paginatedPosts,
+        currentPage: page,
+        totalPages,
+      },
+    };
+  });
+}
+
+const { posts: allPosts, currentPage, totalPages } = Astro.props;
+
+// 转换为 PostList 组件需要的格式
+const posts: Post[] = allPosts.map((post: any) => ({
+  title: post.data.title,
+  url: `/posts/${post.slug}`,
+  date: post.data.date.toISOString(),
+  excerpt: post.data.description,
+  thumbnail: getPostThumbnail(post.data.image, post.body),
+  tags: post.data.tags,
+}));
+---
+
+<BaseLayout pageNumber={currentPage}>
+  <PostList posts={posts} />
+  <Pagination currentPage={currentPage} totalPages={totalPages} />
+</BaseLayout>

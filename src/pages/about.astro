@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig } from '../site.config';
+
+const { site } = siteConfig;
+---
+
+<BaseLayout title="关于" description={`关于 ${site.name}`}>
+  <article class="post_article about-page">
+
+    <div class="content">
+      <section>
+        <h2>网站介绍</h2>
+        <p>
+          这是一个基于 Astro 构建的个人博客，使用 Adams 主题。
+        </p>
+        <p>
+          Adams 是一个简洁、优雅的博客主题，秉承 "Simple is beautiful" 的设计理念。
+        </p>
+      </section>
+
+      <section>
+        <h2>主题特性</h2>
+        <ul>
+          <li>🎨 1:1 复制 Adams WordPress 主题的设计风格</li>
+          <li>⚙️ 集中配置管理（site.config.ts）</li>
+          <li>🌓 三种主题模式（普通/护眼/夜间）</li>
+          <li>📱 响应式设计，适配各种设备</li>
+          <li>⚡ 基于 Astro 构建，性能出色</li>
+          <li>📝 Markdown 内容管理</li>
+          <li>🏷️ 标签系统</li>
+          <li>📚 时间归档</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>技术栈</h2>
+        <ul>
+          <li><strong>Astro</strong> - 现代化的静态网站生成器</li>
+          <li><strong>TypeScript</strong> - 类型安全</li>
+          <li><strong>CSS Variables</strong> - 主题切换</li>
+          <li><strong>Content Collections</strong> - 内容管理</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>联系方式</h2>
+        <p>
+          如有问题或建议，欢迎通过以下方式联系：
+        </p>
+        <ul>
+          <li>邮箱：{site.author}@example.com</li>
+          <li>GitHub：<a href="https://github.com" target="_blank">@username</a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>鸣谢</h2>
+        <p>
+          感谢 <a href="https://biji.io" target="_blank">Tokin</a> 创建了原版 Adams WordPress 主题。
+        </p>
+        <p>
+          本站使用 <a href="https://astro.build" target="_blank">Astro</a> 构建。
+        </p>
+      </section>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .about-page {
+    max-width: 100%;
+  }
+
+  .about-page header {
+    text-align: center;
+    margin: 0 0 3rem;
+    padding: 2rem 0;
+    border-bottom: 2px solid var(--color-border-light);
+  }
+
+  .about-page h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-text-primary);
+  }
+
+  .about-page section {
+    margin: 0 0 3rem;
+  }
+
+  .about-page section:last-child {
+    margin-bottom: 0;
+  }
+
+  .about-page h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .about-page p {
+    margin: 1rem 0;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+  }
+
+  .about-page a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  .about-page a:hover {
+    text-decoration: underline;
+  }
+
+  .about-page strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+</style>

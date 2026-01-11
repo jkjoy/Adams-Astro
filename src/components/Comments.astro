@@ -1,0 +1,116 @@
+---
+/**
+ * Comments Component
+ * 支持 Artalk 和 Twikoo 评论系统
+ */
+import { siteConfig } from '../site.config';
+
+export interface Props {
+  slug: string; // 文章 slug，用作评论的唯一标识
+  title: string; // 文章标题
+}
+
+const { slug, title } = Astro.props;
+const { comments, features } = siteConfig;
+
+// 如果未启用评论或类型为 none，则不显示
+if (!features.comments || comments.type === 'none') {
+  return null;
+}
+
+const commentType = comments.type;
+---
+
+{commentType && (
+  <section class="comments">
+    <div class="container" data-no-instant>
+      <div id="comments" class="comments-area"></div>
+    </div>
+  </section>
+)}
+
+{commentType === 'artalk' && (
+  <>
+    <link rel="stylesheet" href="https://unpkg.com/artalk@latest/dist/Artalk.css" />
+    <script is:inline define:vars={{ comments: comments.artalk, slug, title }}>
+      // 等待 Artalk 加载
+      const loadArtalk = () => {
+        if (typeof Artalk === 'undefined') {
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/artalk@latest/dist/Artalk.js';
+          script.onload = initArtalk;
+          document.head.appendChild(script);
+        } else {
+          initArtalk();
+        }
+      };
+
+      const initArtalk = () => {
+        new Artalk({
+          el: '#comments',
+          pageKey: slug,
+          pageTitle: title,
+          server: comments.server,
+          site: comments.site,
+          placeholder: comments.placeholder,
+          noComment: comments.noComment,
+          sendBtn: comments.sendBtn,
+          darkMode: comments.darkMode,
+          emoticons: comments.emoticons,
+        });
+      };
+
+      // 页面加载后初始化
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadArtalk);
+      } else {
+        loadArtalk();
+      }
+    </script>
+  </>
+)}
+
+{commentType === 'twikoo' && (
+  <script is:inline define:vars={{ comments: comments.twikoo, slug }}>
+    // 等待 Twikoo 加载
+    const loadTwikoo = () => {
+      if (typeof twikoo === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/twikoo@latest/dist/twikoo.all.min.js';
+        script.onload = initTwikoo;
+        document.head.appendChild(script);
+      } else {
+        initTwikoo();
+      }
+    };
+
+    const initTwikoo = () => {
+      twikoo.init({
+        envId: comments.envId,
+        el: '#comments',
+        region: comments.region,
+        lang: comments.lang,
+        path: slug,
+      });
+    };
+
+    // 页面加载后初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadTwikoo);
+    } else {
+      loadTwikoo();
+    }
+  </script>
+)}
+
+<style>
+  .comments {
+    margin: 3rem 0 0;
+    padding: 3rem 0 0;
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  .comments-area {
+    min-height: 200px;
+  }
+</style>

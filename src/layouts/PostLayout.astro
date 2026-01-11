@@ -1,0 +1,118 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Comments from '../components/Comments.astro';
+import ReadingProgress from '../components/ReadingProgress.astro';
+import { siteConfig } from '../site.config';
+import '../styles/lightbox.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  date: Date;
+  author?: string;
+  image?: string;
+  tags?: string[];
+  slug: string; // 文章 slug
+  prevPost?: { slug: string; title: string } | null;
+  nextPost?: { slug: string; title: string } | null;
+}
+
+const { title, description, date, author, image, tags, slug, prevPost, nextPost } = Astro.props;
+const { features } = siteConfig;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={image}
+  postTitle={title}
+  postDate={date}
+  postSlug={slug}
+>
+  <!-- 阅读进度条 -->
+  {features.readingProgress && <ReadingProgress />}
+
+  <!-- 文章内容 -->
+  <section class="container">
+    <article class="post_article" itemscope itemtype="https://schema.org/Article" data-pagefind-body>
+      <!-- Pagefind 元数据 -->
+      <h1 data-pagefind-meta="title" style="display: none;">{title}</h1>
+      <time data-pagefind-meta="date" datetime={date.toISOString()} style="display: none;">
+        {date.toISOString().split('T')[0]}
+      </time>
+      {tags && tags.map((tag) => (
+        <span data-pagefind-filter="tag" style="display: none;">{tag}</span>
+      ))}
+
+      <slot />
+    </article>
+
+    <!-- 标签 -->
+    {tags && tags.length > 0 && (
+      <ul class="tags">
+        {tags.map((tag) => (
+          <li>
+            <a href={`/tags/${tag}`}>{tag}</a>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <!-- 上下篇导航 -->
+    {(prevPost || nextPost) && (
+      <nav class="nearbypost">
+        <div class="alignleft">
+          {prevPost && (
+            <a href={`/posts/${prevPost.slug}`} title={prevPost.title}>
+              {prevPost.title}
+            </a>
+          )}
+        </div>
+        <div class="alignright">
+          {nextPost && (
+            <a href={`/posts/${nextPost.slug}`} title={nextPost.title}>
+              {nextPost.title}
+            </a>
+          )}
+        </div>
+      </nav>
+    )}
+      <!-- 评论系统 -->
+  <Comments slug={slug} title={title} />
+  </section>
+
+
+</BaseLayout>
+
+<style>
+  /* Tags 样式 */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 5% 0 4%;
+  }
+
+  .tags li {
+    margin: 10px 10px 10px 0;
+  }
+
+  .tags li a {
+    background-color: rgba(136, 136, 136, 0.1);
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  .tags li a:hover {
+    background-color: var(--color-primary);
+    color: white;
+  }
+</style>
+
+<script>
+  import '../scripts/postEnhancements.ts';
+</script>

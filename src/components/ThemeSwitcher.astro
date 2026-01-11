@@ -1,0 +1,150 @@
+---
+import { siteConfig } from '../site.config';
+
+// 右侧工具栏 - 按照原版 Adams 实现
+const { site, features } = siteConfig;
+const currentPath = Astro.url.pathname;
+const isHomePage = currentPath === '/';
+---
+
+<div class="setting_tool">
+  <!-- 回到顶部按钮 -->
+  <a class="back2top" title="回到顶部">
+    <i class="czs-arrow-up-l"></i>
+  </a>
+
+  <!-- 首页按钮 (非首页时显示) -->
+  {!isHomePage && (
+    <a class="home" href="/" title="返回首页">
+      <i class="czs-home-l"></i>
+    </a>
+  )}
+
+  <!-- 搜索按钮 -->
+  {features.search && (
+    <a class="sosearch" href="/search" title="搜索">
+      <i class="czs-search-l"></i>
+    </a>
+  )}
+
+  <!-- 主题切换按钮 -->
+  <a class="socolor" title="切换主题">
+    <i class="czs-clothes-l"></i>
+  </a>
+
+  <!-- 主题选择面板 -->
+  <div class="c">
+    <ul>
+      <li class="color undefined">默认</li>
+      <li class="color sepia">护眼</li>
+      <li class="color night">夜晚</li>
+      <li class="hr"></li>
+      <li class="font serif">Serif</li>
+      <li class="font sans">Sans</li>
+    </ul>
+  </div>
+</div>
+
+<script is:inline>
+  // 回到顶部功能
+  function initBackToTop() {
+    const backToTop = document.querySelector('.back2top');
+    if (!backToTop) return;
+
+    // 监听滚动事件
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        backToTop.classList.add('show');
+      } else {
+        backToTop.classList.remove('show');
+      }
+    });
+
+    // 点击回到顶部
+    backToTop.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  }
+
+  // 搜索功能 - 直接跳转到搜索页面，无需额外逻辑
+
+  // 主题切换功能
+  function initThemeSwitcher() {
+    const settingTool = document.querySelector('.setting_tool');
+    const colorBtn = document.querySelector('.socolor');
+    const colorPanel = document.querySelectorAll('.setting_tool .c ul li');
+
+    if (!settingTool || !colorBtn) return;
+
+    // 点击主题按钮，切换面板显示
+    colorBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 切换主题面板
+      if (settingTool.classList.contains('colors')) {
+        settingTool.classList.remove('colors');
+      } else {
+        settingTool.classList.add('colors');
+      }
+    });
+
+    // 点击页面其他地方关闭面板
+    document.addEventListener('click', (e) => {
+      if (!settingTool.contains(e.target)) {
+        settingTool.classList.remove('colors');
+      }
+    });
+
+    // 主题选择
+    colorPanel.forEach(item => {
+      item.addEventListener('click', () => {
+        if (item.classList.contains('sepia')) {
+          // 护眼模式
+          localStorage.setItem('adams_color_style', 'sepia');
+          document.documentElement.className = 'sepia';
+          if (localStorage.getItem('adams_font_style')) {
+            document.documentElement.classList.add(localStorage.getItem('adams_font_style'));
+          }
+        } else if (item.classList.contains('night')) {
+          // 夜间模式
+          localStorage.setItem('adams_color_style', 'night');
+          document.documentElement.className = 'night';
+          if (localStorage.getItem('adams_font_style')) {
+            document.documentElement.classList.add(localStorage.getItem('adams_font_style'));
+          }
+        } else if (item.classList.contains('undefined')) {
+          // 默认模式
+          localStorage.removeItem('adams_color_style');
+          document.documentElement.className = '';
+          if (localStorage.getItem('adams_font_style')) {
+            document.documentElement.classList.add(localStorage.getItem('adams_font_style'));
+          }
+        } else if (item.classList.contains('serif')) {
+          // Serif 字体
+          localStorage.setItem('adams_font_style', 'serif');
+          document.documentElement.classList.add('serif');
+        } else if (item.classList.contains('sans')) {
+          // Sans 字体
+          localStorage.removeItem('adams_font_style');
+          document.documentElement.classList.remove('serif');
+        }
+      });
+    });
+  }
+
+  // 初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initBackToTop();
+      initThemeSwitcher();
+    });
+  } else {
+    initBackToTop();
+    initThemeSwitcher();
+  }
+</script>

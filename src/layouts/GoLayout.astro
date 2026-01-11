@@ -1,0 +1,98 @@
+---
+import { siteConfig } from '../site.config';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import '../styles/global.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  // 文章信息（仅文章页传入）
+  postTitle?: string;
+  postDate?: Date;
+  postSlug?: string;
+  // 页码（用于分页）
+  pageNumber?: number;
+}
+
+const { title, description, image, postTitle, postDate, postSlug, pageNumber } = Astro.props;
+
+const { site, seo } = siteConfig;
+const currentPath = Astro.url.pathname;
+const isHomePage = currentPath === '/';
+
+// 用于 SEO 的 title
+// 如果有 pageNumber，在标题后面添加页码
+let pageTitle = title ? `${title} - ${site.title}` : site.title;
+if (pageNumber && pageNumber > 1) {
+  pageTitle = `${site.title} - 第 ${pageNumber} 页`;
+}
+const pageDescription = description || site.description;
+const pageImage = image || seo.ogImage;
+
+// 用于 Header h1 显示的标题
+// 首页和分页显示网站名称，其他页面显示页面标题（文章标题或页面标题）
+const headerTitle = isHomePage || pageNumber ? site.name : (postTitle || title || site.name);
+---
+
+<!DOCTYPE html>
+<html lang={site.language}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO -->
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="author" content={site.author} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={pageImage} />
+    <meta property="og:url" content={site.url} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content={seo.twitterCard} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={pageImage} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- 预加载图标字体 -->
+    <link
+      rel="preload"
+      href="/fonts/StrawberryIcon-pro.woff?cgglgw"
+      as="font"
+      type="font/woff"
+      crossorigin
+    />
+
+    <!-- 防止主题闪烁 - 在页面渲染前应用主题 -->
+    <script is:inline>
+      // 立即执行，在页面渲染前应用主题
+      (function() {
+        const colorTheme = localStorage.getItem('adams_color_style');
+        const fontTheme = localStorage.getItem('adams_font_style');
+
+        if (colorTheme) {
+          document.documentElement.classList.add(colorTheme);
+        }
+        if (fontTheme) {
+          document.documentElement.classList.add(fontTheme);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="main-load">
+      <div class="container">
+        <slot />
+      </div>
+    </main>
+    <ThemeSwitcher />
+  </body>
+</html>

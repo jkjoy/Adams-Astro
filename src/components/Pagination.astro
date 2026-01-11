@@ -1,0 +1,104 @@
+---
+/**
+ * Pagination Component
+ * 分页导航组件，按照原版 Adams 主题样式
+ */
+export interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath?: string; // 基础路径，默认为空（首页）
+}
+
+const { currentPage, totalPages, basePath = '' } = Astro.props;
+
+// 生成页码数组
+function generatePageNumbers(current: number, total: number): (number | 'ellipsis')[] {
+  const pages: (number | 'ellipsis')[] = [];
+
+  // 如果总页数 <= 7，显示所有页码
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  // 总页数 > 7，使用省略号
+  // 始终显示第一页
+  pages.push(1);
+
+  // 计算当前页周围显示的范围
+  const leftBound = Math.max(2, current - 1);
+  const rightBound = Math.min(total - 1, current + 1);
+
+  // 左侧省略号
+  if (leftBound > 2) {
+    pages.push('ellipsis');
+  }
+
+  // 当前页周围的页码
+  for (let i = leftBound; i <= rightBound; i++) {
+    pages.push(i);
+  }
+
+  // 右侧省略号
+  if (rightBound < total - 1) {
+    pages.push('ellipsis');
+  }
+
+  // 始终显示最后一页
+  if (total > 1) {
+    pages.push(total);
+  }
+
+  return pages;
+}
+
+// 生成页面 URL
+function getPageUrl(page: number): string {
+  if (page === 1) {
+    return basePath || '/';
+  }
+  return `${basePath}/page/${page}`;
+}
+
+const pageNumbers = generatePageNumbers(currentPage, totalPages);
+---
+
+{totalPages > 1 && (
+  <nav class="page-navigator" aria-label="分页导航">
+    {currentPage > 1 && (
+      <a href={getPageUrl(currentPage - 1)} class="prev" aria-label={`上一页，第 ${currentPage - 1} 页`}>
+        <i class="czs-angle-left-l" aria-hidden="true"></i>
+      </a>
+    )}
+
+    <ol>
+      {pageNumbers.map((page) => (
+        page === 'ellipsis' ? (
+          <li><span class="page-number" aria-hidden="true">...</span></li>
+        ) : (
+          <li>
+            {page === currentPage ? (
+              <span class="page-number current" aria-current="page" aria-label={`当前页，第 ${page} 页`}>{page}</span>
+            ) : (
+              <a href={getPageUrl(page)} class="page-number" aria-label={`第 ${page} 页`}>
+                {page}
+              </a>
+            )}
+          </li>
+        )
+      ))}
+    </ol>
+
+    {currentPage < totalPages && (
+      <a href={getPageUrl(currentPage + 1)} class="next" aria-label={`下一页，第 ${currentPage + 1} 页`}>
+        <i class="czs-angle-right-l" aria-hidden="true"></i>
+      </a>
+    )}
+  </nav>
+)}
+
+<style>
+  /* Pagination 样式已在 global.css 中定义 */
+</style>

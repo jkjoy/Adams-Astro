@@ -1,0 +1,45 @@
+---
+/**
+ * Placard Component
+ * 网站公告，显示在非文章页的 Header 下方
+ */
+import { siteConfig } from '../site.config';
+
+const { placard } = siteConfig;
+
+// 当内容为空时，自动启用一言
+const shouldUseHitokoto = placard.hitokoto || (!placard.content || placard.content.trim() === '');
+---
+
+{placard.enable && (
+  <div class="placard" data-hitokoto={shouldUseHitokoto}>
+    {placard.content}
+  </div>
+)}
+
+<script>
+  // 如果启用了一言 API，则从 API 获取内容
+  document.addEventListener('DOMContentLoaded', () => {
+    const placardEl = document.querySelector('.placard');
+    if (!placardEl) return;
+
+    const enableHitokoto = placardEl.getAttribute('data-hitokoto') === 'true';
+    if (!enableHitokoto) return;
+
+    // 从一言 API 获取内容
+    fetch('https://v1.hitokoto.cn')
+      .then(response => response.json())
+      .then(data => {
+        if (data.hitokoto) {
+          placardEl.textContent = data.hitokoto;
+        }
+      })
+      .catch(error => {
+        console.error('Failed to fetch hitokoto:', error);
+      });
+  });
+</script>
+
+<style>
+  /* Placard 样式已在 global.css 中定义 */
+</style>
