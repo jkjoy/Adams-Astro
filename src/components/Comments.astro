@@ -31,13 +31,13 @@ const commentType = comments.type;
 
 {commentType === 'artalk' && (
   <>
-    <link rel="stylesheet" href="https://unpkg.com/artalk@latest/dist/Artalk.css" />
+    <link rel="stylesheet" href="https://unpkg.com/artalk@2.9.1/dist/Artalk.css" />
     <script is:inline define:vars={{ comments: comments.artalk, slug, title }}>
       // 等待 Artalk 加载
       const loadArtalk = () => {
         if (typeof Artalk === 'undefined') {
           const script = document.createElement('script');
-          script.src = 'https://unpkg.com/artalk@latest/dist/Artalk.js';
+          script.src = 'https://unpkg.com/artalk@2.9.1/dist/Artalk.js';
           script.onload = initArtalk;
           document.head.appendChild(script);
         } else {
@@ -76,7 +76,7 @@ const commentType = comments.type;
     const loadTwikoo = () => {
       if (typeof twikoo === 'undefined') {
         const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/twikoo@latest/dist/twikoo.all.min.js';
+        script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.7.11/dist/twikoo.all.min.js';
         script.onload = initTwikoo;
         document.head.appendChild(script);
       } else {

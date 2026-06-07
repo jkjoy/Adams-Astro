@@ -28,7 +28,9 @@ if (pageNumber && pageNumber > 1) {
   pageTitle = `${site.title} - 第 ${pageNumber} 页`;
 }
 const pageDescription = description || site.description;
-const pageImage = image || seo.ogImage;
+const pageImage = new URL(image || seo.ogImage, site.url).toString();
+const pageUrl = new URL(currentPath, site.url).toString();
+const ogType = postTitle ? 'article' : 'website';
 
 // 用于 Header h1 显示的标题
 // 首页和分页显示网站名称，其他页面显示页面标题（文章标题或页面标题）
@@ -46,13 +48,14 @@ const headerTitle = isHomePage || pageNumber ? site.name : (postTitle || title |
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
     <meta name="author" content={site.author} />
+    <link rel="canonical" href={pageUrl} />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:image" content={pageImage} />
-    <meta property="og:url" content={site.url} />
+    <meta property="og:url" content={pageUrl} />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content={seo.twitterCard} />

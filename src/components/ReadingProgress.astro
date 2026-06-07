@@ -9,6 +9,8 @@
 
 <script>
   // 计算并更新阅读进度
+  let ticking = false;
+
   function updateReadingProgress() {
     const progressBar = document.querySelector('.reading-progress-bar') as HTMLElement;
     if (!progressBar) return;
@@ -17,12 +19,21 @@
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollableHeight = documentHeight - windowHeight;
 
     // 计算百分比
-    const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
+    const scrollPercent = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 100;
 
     // 更新进度条宽度
     progressBar.style.width = `${Math.min(scrollPercent, 100)}%`;
+    ticking = false;
+  }
+
+  function requestReadingProgressUpdate() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateReadingProgress);
+    }
   }
 
   // 初始化
@@ -31,10 +42,10 @@
     updateReadingProgress();
 
     // 监听滚动事件
-    window.addEventListener('scroll', updateReadingProgress, { passive: true });
+    window.addEventListener('scroll', requestReadingProgressUpdate, { passive: true });
 
     // 监听窗口大小变化
-    window.addEventListener('resize', updateReadingProgress, { passive: true });
+    window.addEventListener('resize', requestReadingProgressUpdate, { passive: true });
   }
 
   // 页面加载完成后初始化

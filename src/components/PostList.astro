@@ -23,6 +23,15 @@ function formatDate(dateString: string) {
     day: 'numeric'
   });
 }
+
+function getThumbnailStyle(thumbnail: string) {
+  const escapedUrl = thumbnail
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/[\n\r\f]/g, '');
+
+  return `background-image: url("${escapedUrl}")`;
+}
 ---
 
 <div class="post-list">
@@ -35,7 +44,7 @@ function formatDate(dateString: string) {
       </header>
       <main>
         {post.thumbnail && (
-          <div class="thumb" style={`background-image: url(${post.thumbnail})`}></div>
+          <div class="thumb" style={getThumbnailStyle(post.thumbnail)}></div>
         )}
         {post.excerpt && <p>{post.excerpt}</p>}
       </main>
